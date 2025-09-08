@@ -94,7 +94,6 @@ void loadSettings()
     settings.enableLawicel = nvPrefs.getBool("enableLawicel", true);
 
     Logger::console("Running on EVTV ESP32 Board");
-    SPI.begin(18, 19, 23, 5); // SCK, MISO, MOSI, CS
     canBuses[0] = &CAN0;
     canBuses[1] = &CAN1;
     CAN1.setCSPin(5);
@@ -186,10 +185,6 @@ void setup()
     //CAN1.setDebuggingMode(true);
 
     canManager.setup();
-
-    uint32_t regVal = CAN1.Read(0x000); // ADDR_CiCON from the library defines
-    Serial.print("MCP2517FD CiCON Register Value: 0x");
-    Serial.println(regVal, HEX);
 
     if (settings.enableBT) 
     {
