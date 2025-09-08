@@ -254,6 +254,11 @@ void loop()
     canManager.loop();
     /*if (!settings.enableBT)*/ wifiManager.loop();
 
+    if (leds[0] != CRGB::Red && (millis() - canManager.lastLEDActivity > 50)) { // 50ms duration
+        leds[0] = CRGB::Red;
+        FastLED.show();
+    }
+
     size_t wifiLength = wifiGVRET.numAvailableBytes();
     size_t serialLength = serialGVRET.numAvailableBytes();
     size_t maxLength = (wifiLength>serialLength) ? wifiLength : serialLength;

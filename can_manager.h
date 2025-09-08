@@ -23,6 +23,9 @@ public:
     void displayFrame(CAN_FRAME_FD &frame, int whichBus);
     void loop();
     void setup();
+    uint32_t lastLEDActivity;
+    void handleLEDRX(int busID);
+    void handleLEDTX(int busID);
 
 private:
     BUSLOAD busLoad[NUM_BUSES];

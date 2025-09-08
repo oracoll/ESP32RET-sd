@@ -6,6 +6,9 @@
 #include "gvret_comm.h"
 #include "lawicel.h"
 #include "ELM327_Emulator.h"
+#include <FastLED.h>
+
+extern CRGB leds[A0_NUM_LEDS];
 
 
 //twai alerts copied here for ease of access. Look up alerts right here:
@@ -106,6 +109,7 @@ void CANManager::sendFrame(CAN_COMMON *bus, CAN_FRAME &frame)
     for (int i = 0; i < NUM_BUSES; i++) if (canBuses[i] == bus) whichBus = i;
     bus->sendFrame(frame);
     addBits(whichBus, frame);
+    handleLEDTX(whichBus);
 }
 
 void CANManager::sendFrame(CAN_COMMON *bus, CAN_FRAME_FD &frame)
@@ -114,6 +118,7 @@ void CANManager::sendFrame(CAN_COMMON *bus, CAN_FRAME_FD &frame)
     for (int i = 0; i < NUM_BUSES; i++) if (canBuses[i] == bus) whichBus = i;
     bus->sendFrameFD(frame);
     addBits(whichBus, frame);
+    handleLEDTX(whichBus);
 }
 
 
@@ -127,6 +132,27 @@ void CANManager::displayFrame(CAN_FRAME &frame, int whichBus)
     {
         if (SysSettings.isWifiActive) wifiGVRET.sendFrameToBuffer(frame, whichBus);
         else serialGVRET.sendFrameToBuffer(frame, whichBus);
+    }
+}
+
+void CANManager::handleLEDRX(int busID) {
+    if (busID == 0) {
+        leds[0] = CRGB::Green;
+        FastLED.show();
+        lastLEDActivity = millis();
+    }
+    if (busID == 1) {
+        leds[0] = CRGB::Yellow;
+        FastLED.show();
+        lastLEDActivity = millis();
+    }
+}
+
+void CANManager::handleLEDTX(int busID) {
+    if (busID == 1) {
+        leds[0] = CRGB::Yellow;
+        FastLED.show();
+        lastLEDActivity = millis();
     }
 }
 
@@ -177,12 +203,14 @@ void CANManager::loop()
                 canBuses[i]->read(incoming);
                 addBits(i, incoming);
                 displayFrame(incoming, i);
+                handleLEDRX(i);
             }
             else
             {
                 canBuses[i]->readFD(inFD);
                 addBits(i, inFD);
                 displayFrame(inFD, i);
+                handleLEDRX(i);
             }
             
             toggleRXLED();
