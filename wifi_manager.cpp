@@ -8,7 +8,7 @@
 #include <FastLED.h>
 #include "ELM327_Emulator.h"
 
-extern CRGB leds[A5_NUM_LEDS];
+extern CRGB leds[A0_NUM_LEDS];
 
 static IPAddress broadcastAddr(255,255,255,255);
 
