@@ -84,6 +84,26 @@ void CANManager::setup()
         if (busLoad[j].bitsPerQuarter == 0) busLoad[j].bitsPerQuarter = 125000;
     }
 
+    // For CAN1, which is an MCP2517FD, we may need to configure its
+    // internal GPIO to enable the external CAN transceiver.
+    if (settings.canSettings[1].enabled && canBuses[1] != nullptr)
+    {
+        Serial.println("Attempting to enable CAN1 transceiver via MCP2517FD GPIO...");
+        MCP2517FD *can = (MCP2517FD *)canBuses[1];
+        uint8_t stdbymode;
+
+        // This logic is adapted from the Macchina A5 board configuration.
+        // It configures the MCP2517FD's GPIO0 pin to control the transceiver's standby mode.
+        stdbymode = can->Read8(0xE04); // Address of CiGPIO register
+        stdbymode |= 0x40;             // Set bit 6 (GPIO0) to enable XSTBY mode
+        can->Write8(0xE04, stdbymode);
+
+        stdbymode = can->Read8(0xE04);
+        stdbymode &= 0xFE;             // Clear bit 0 (GPIO0) to set it as an output
+        can->Write8(0xE04, stdbymode);
+        Serial.println("CAN1 transceiver should now be enabled.");
+    }
+
     busLoadTimer = millis();
 }
 
@@ -144,7 +164,7 @@ void CANManager::handleLEDRX(int busID) {
     }
     if (busID == 1) {
         Serial.println("LED Event: CAN1 RX");
-        leds[0] = CRGB::Yellow;
+        leds[0] = CRGB::Blue;
         FastLED.show();
         lastLEDActivity = millis();
     }
@@ -159,7 +179,7 @@ void CANManager::handleLEDTX(int busID) {
     }
     if (busID == 1) {
         Serial.println("LED Event: CAN1 TX");
-        leds[0] = CRGB::Yellow;
+        leds[0] = CRGB::Blue;
         FastLED.show();
         lastLEDActivity = millis();
     }
