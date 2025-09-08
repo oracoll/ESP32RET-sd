@@ -137,11 +137,13 @@ void CANManager::displayFrame(CAN_FRAME &frame, int whichBus)
 
 void CANManager::handleLEDRX(int busID) {
     if (busID == 0) {
+        Serial.println("LED Event: CAN0 RX");
         leds[0] = CRGB::Green;
         FastLED.show();
         lastLEDActivity = millis();
     }
     if (busID == 1) {
+        Serial.println("LED Event: CAN1 RX");
         leds[0] = CRGB::Yellow;
         FastLED.show();
         lastLEDActivity = millis();
@@ -149,7 +151,14 @@ void CANManager::handleLEDRX(int busID) {
 }
 
 void CANManager::handleLEDTX(int busID) {
+    if (busID == 0) {
+        Serial.println("LED Event: CAN0 TX");
+        leds[0] = CRGB::Green;
+        FastLED.show();
+        lastLEDActivity = millis();
+    }
     if (busID == 1) {
+        Serial.println("LED Event: CAN1 TX");
         leds[0] = CRGB::Yellow;
         FastLED.show();
         lastLEDActivity = millis();
