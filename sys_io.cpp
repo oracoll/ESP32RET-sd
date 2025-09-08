@@ -33,7 +33,7 @@ by stimmer
 #include "sys_io.h"
 #include <FastLED.h>
 
-extern CRGB leds[A5_NUM_LEDS];
+extern CRGB leds[A0_NUM_LEDS];
 
 bool useRawADC = false;
 
