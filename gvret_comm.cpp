@@ -144,11 +144,6 @@ void GVRET_Comm_Handler::processIncomingByte(uint8_t in_byte)
             transmitBuffer[transmitBufferLength++] = 0xAD;
             state = IDLE;
             break;
-        case PROTO_SET_SYSTYPE:
-            buff[0] = 0xF1;
-            state = SET_SYSTYPE;
-            step = 0;
-            break;
         case PROTO_ECHO_CAN_FRAME:
             state = ECHO_CAN_FRAME;
             buff[0] = 0xF1;
@@ -369,13 +364,6 @@ void GVRET_Comm_Handler::processIncomingByte(uint8_t in_byte)
             }
             //EEPROM.writeBytes(0, &settings, sizeof(settings));
             //EEPROM.commit();
-            state = IDLE;
-            break;
-        case SET_SYSTYPE:
-            settings.systemType = in_byte;
-            //EEPROM.writeBytes(0, &settings, sizeof(settings));
-            //EEPROM.commit();
-            //loadSettings();
             state = IDLE;
             break;
         case ECHO_CAN_FRAME:

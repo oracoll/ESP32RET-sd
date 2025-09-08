@@ -69,7 +69,6 @@ void SerialConsole::printMenu()
     Serial.println("Config Commands (enter command=newvalue). Current values shown in parenthesis:");
     Serial.println();
 
-    Logger::console("SYSTYPE=%i - Set board type (0=Macchina A0, 1=EVTV ESP32 Board 2=Macchina A5)", settings.systemType);
     Logger::console("LOGLEVEL=%i - set log level (0=debug, 1=info, 2=warn, 3=error, 4=off)", settings.logLevel);
     Serial.println();
 
@@ -365,15 +364,6 @@ void SerialConsole::handleConfigCmd()
         Logger::console("Setting WPA2 Key to %s", newString);
         strcpy((char *)settings.WPA2Key, newString);
         writeEEPROM = true;
-    } else if (cmdString == String("SYSTYPE")) {
-        if (newValue < 0) newValue = 0;
-        if (newValue > 3) newValue = 3;
-        if (newValue == 0) Logger::console("Setting board type to Macchina A0");
-        if (newValue == 1) Logger::console("Setting board type to EVTV ESP32");
-        if (newValue == 2) Logger::console("Setting board type to Macchina 5CAN");
-        if (newValue == 3) Logger::console("Setting board type to EVTV ESP32-S3");
-        settings.systemType = newValue;
-        writeEEPROM = true;
     } else if (cmdString == String("LOGLEVEL")) {
         switch (newValue) {
         case 0:
@@ -433,7 +423,6 @@ void SerialConsole::handleConfigCmd()
         nvPrefs.putBool("enable-bt", settings.enableBT);
         nvPrefs.putBool("enableLawicel", settings.enableLawicel);
         nvPrefs.putUChar("loglevel", settings.logLevel);
-        nvPrefs.putUChar("systype", settings.systemType);
         nvPrefs.putUChar("wifiMode", settings.wifiMode);
         nvPrefs.putString("SSID", settings.SSID);
         nvPrefs.putString("wpa2Key", settings.WPA2Key);

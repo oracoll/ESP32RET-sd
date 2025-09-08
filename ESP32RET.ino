@@ -71,7 +71,7 @@ LAWICELHandler lawicel;
 
 SerialConsole console;
 
-CRGB leds[A5_NUM_LEDS]; //A5 has the largest # of LEDs so use that one even for A0 or EVTV
+CRGB leds[A0_NUM_LEDS];
 
 CAN_COMMON *canBuses[NUM_BUSES];
 
@@ -93,150 +93,33 @@ void loadSettings()
     settings.enableBT = nvPrefs.getBool("enable-bt", false);
     settings.enableLawicel = nvPrefs.getBool("enableLawicel", true);
 
-    uint8_t defaultVal = (espChipRevision > 2) ? 0 : 1; //0 = A0, 1 = EVTV ESP32
-#ifdef CONFIG_IDF_TARGET_ESP32S3
-    defaultVal = 3;
-#endif
-    settings.systemType = nvPrefs.getUChar("systype", defaultVal);
-
-    if (settings.systemType == 0)
-    {
-        Logger::console("Running on Macchina A0");
-        canBuses[0] = &CAN0;
-        SysSettings.LED_CANTX = 255;
-        SysSettings.LED_CANRX = 255;
-        SysSettings.LED_LOGGING = 255;
-        SysSettings.LED_CONNECTION_STATUS = 0;
-        SysSettings.fancyLED = true;
-        SysSettings.logToggle = false;
-        SysSettings.txToggle = true;
-        SysSettings.rxToggle = true;
-        SysSettings.lawicelAutoPoll = false;
-        SysSettings.lawicelMode = false;
-        SysSettings.lawicellExtendedMode = false;
-        SysSettings.lawicelTimestamping = false;
-        SysSettings.numBuses = 1; //Currently we support CAN0
-        SysSettings.isWifiActive = false;
-        SysSettings.isWifiConnected = false;
-        strcpy(deviceName, MACC_NAME);
-        strcpy(otaHost, "macchina.cc");
-        strcpy(otaFilename, "/a0/files/a0ret.bin");
-        pinMode(13, OUTPUT);
-        digitalWrite(13, LOW);
-        delay(100);
-        FastLED.addLeds<LED_TYPE, A0_LED_PIN, COLOR_ORDER>(leds, A0_NUM_LEDS).setCorrection( TypicalLEDStrip );
-        FastLED.setBrightness(  BRIGHTNESS );
-        leds[0] = CRGB::Red;
-        FastLED.show();
-        pinMode(21, OUTPUT);
-        digitalWrite(21, LOW);
-        CAN0.setCANPins(GPIO_NUM_4, GPIO_NUM_5);
-    }
-
-    if (settings.systemType == 1)
-    {
-        Logger::console("Running on EVTV ESP32 Board");
-        canBuses[0] = &CAN0;
-        canBuses[1] = &CAN1;
-        SysSettings.LED_CANTX = 255;
-        SysSettings.LED_CANRX = 255;
-        SysSettings.LED_LOGGING = 255;
-        SysSettings.LED_CONNECTION_STATUS = 255;
-        SysSettings.fancyLED = false;
-        SysSettings.logToggle = false;
-        SysSettings.txToggle = true;
-        SysSettings.rxToggle = true;
-        SysSettings.lawicelAutoPoll = false;
-        SysSettings.lawicelMode = false;
-        SysSettings.lawicellExtendedMode = false;
-        SysSettings.lawicelTimestamping = false;
-        SysSettings.numBuses = 2;
-        SysSettings.isWifiActive = false;
-        SysSettings.isWifiConnected = false;
-        strcpy(deviceName, EVTV_NAME);
-        strcpy(otaHost, "media3.evtv.me");
-        strcpy(otaFilename, "/esp32ret.bin");
-    }
-
-    if (settings.systemType == 2)
-    {
-        Logger::console("Running on Macchina 5-CAN");
-        canBuses[0] = &CAN0; //SWCAN on this hardware - DLC pin 1
-        canBuses[1] = &CAN1; //DLC pins 1 and 9. Overlaps with SWCAN
-        canBuses[2] = new MCP2517FD(33, 39); //DLC pins 3/11
-        canBuses[3] = new MCP2517FD(25, 34); //DLC pins 6/14
-        canBuses[4] = new MCP2517FD(14, 13); //DLC pins 12/13
-
-        //reconfigure the two already defined CAN buses to use the actual pins for this board.
-        CAN0.setCANPins(GPIO_NUM_4, GPIO_NUM_5); //rx, tx - This is the SWCAN interface
-        CAN1.setINTPin(36);
-        CAN1.setCSPin(32);
-        SysSettings.LED_CANTX = 0;
-        SysSettings.LED_CANRX = 1;
-        SysSettings.LED_LOGGING = 2;
-        SysSettings.LED_CONNECTION_STATUS = 3;
-        SysSettings.fancyLED = true;
-        SysSettings.logToggle = false;
-        SysSettings.txToggle = true;
-        SysSettings.rxToggle = true;
-        SysSettings.lawicelAutoPoll = false;
-        SysSettings.lawicelMode = false;
-        SysSettings.lawicellExtendedMode = false;
-        SysSettings.lawicelTimestamping = false;
-        SysSettings.numBuses = 5;
-        SysSettings.isWifiActive = false;
-        SysSettings.isWifiConnected = false;
-
-
-        FastLED.addLeds<LED_TYPE, A5_LED_PIN, COLOR_ORDER>(leds, A5_NUM_LEDS).setCorrection( TypicalLEDStrip );
-        FastLED.setBrightness(  BRIGHTNESS );
-        //With the board facing up and looking at the USB end the LEDs are 0 1 2 (USB) 3
-        //can test LEDs here for debugging but normally leave first three off and set connection to RED.
-        //leds[0] = CRGB::White;
-        //leds[1] = CRGB::Blue;
-        //leds[2] = CRGB::Green;
-        leds[3] = CRGB::Red;
-        FastLED.show();
-
-        strcpy(deviceName, MACC_NAME);
-        strcpy(otaHost, "macchina.cc");
-        strcpy(otaFilename, "/a0/files/a0ret.bin");
-        //Single wire interface
-        pinMode(SW_EN, OUTPUT);
-        pinMode(SW_MODE0, OUTPUT);
-        pinMode(SW_MODE1, OUTPUT);
-        digitalWrite(SW_EN, LOW);      //MUST be LOW to use CAN1 channel 
-        //HH = Normal Mode
-        digitalWrite(SW_MODE0, HIGH);
-        digitalWrite(SW_MODE1, HIGH);
-    }
-
-    if (settings.systemType == 3)
-    {
-        Logger::console("Running on EVTV ESP32-S3 Board");
-        canBuses[0] = &CAN0;
-        canBuses[1] = &CAN1;
-        //CAN1.setINTPin(3);
-        //CAN1.setCSPin(10);
-        SysSettings.LED_CANTX = 255;//18;
-        SysSettings.LED_CANRX = 255;//18;
-        SysSettings.LED_LOGGING = 255;
-        SysSettings.LED_CONNECTION_STATUS = 255;
-        SysSettings.fancyLED = false;
-        SysSettings.logToggle = false;
-        SysSettings.txToggle = true;
-        SysSettings.rxToggle = true;
-        SysSettings.lawicelAutoPoll = false;
-        SysSettings.lawicelMode = false;
-        SysSettings.lawicellExtendedMode = false;
-        SysSettings.lawicelTimestamping = false;
-        SysSettings.numBuses = 2;
-        SysSettings.isWifiActive = false;
-        SysSettings.isWifiConnected = false;
-        strcpy(deviceName, EVTV_NAME);
-        strcpy(otaHost, "media3.evtv.me");
-        strcpy(otaFilename, "/esp32s3ret.bin");
-    }
+    Logger::console("Running on EVTV ESP32 Board");
+    canBuses[0] = &CAN0;
+    canBuses[1] = &CAN1;
+    CAN1.setCSPin(5);
+    CAN1.setINTPin(27);
+    FastLED.addLeds<LED_TYPE, 2, COLOR_ORDER>(leds, A0_NUM_LEDS).setCorrection( TypicalLEDStrip );
+    FastLED.setBrightness(  BRIGHTNESS );
+    leds[0] = CRGB::Red;
+    FastLED.show();
+    SysSettings.LED_CANTX = 255;
+    SysSettings.LED_CANRX = 255;
+    SysSettings.LED_LOGGING = 255;
+    SysSettings.LED_CONNECTION_STATUS = 255;
+    SysSettings.fancyLED = false;
+    SysSettings.logToggle = false;
+    SysSettings.txToggle = true;
+    SysSettings.rxToggle = true;
+    SysSettings.lawicelAutoPoll = false;
+    SysSettings.lawicelMode = false;
+    SysSettings.lawicellExtendedMode = false;
+    SysSettings.lawicelTimestamping = false;
+    SysSettings.numBuses = 2;
+    SysSettings.isWifiActive = false;
+    SysSettings.isWifiConnected = false;
+    strcpy(deviceName, EVTV_NAME);
+    strcpy(otaHost, "media3.evtv.me");
+    strcpy(otaFilename, "/esp32ret.bin");
 
     if (nvPrefs.getString("SSID", settings.SSID, 32) == 0)
     {

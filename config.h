@@ -53,7 +53,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define CFG_VERSION "Alpha Nov 29 2020"
 #define PREF_NAME   "ESP32RET"
 #define EVTV_NAME   "ESP32RET"
-#define MACC_NAME   "A0RET"
 
 #define MARK_LIMIT  6   //# of our analog input pins to use for marking. Defaults to all of them. Send voltage to pin to trigger it
 
@@ -66,17 +65,10 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //It's not even used on this hardware currently. But, slows down the blinks to make them more visible
 #define BLINK_SLOWNESS  100 
 
-#define A0_LED_PIN     2
 #define A0_NUM_LEDS    1
-#define A5_LED_PIN     15
-#define A5_NUM_LEDS    4
 #define BRIGHTNESS  190
 #define LED_TYPE    WS2812B
 #define COLOR_ORDER GRB
-
-#define SW_EN     2
-#define SW_MODE0  26
-#define SW_MODE1  27
 
 //How many devices to allow to connect to our WiFi telnet port?
 #define MAX_CLIENTS 1
@@ -102,7 +94,6 @@ struct EEPROMSettings {
     boolean useBinarySerialComm; //use a binary protocol on the serial link or human readable format?
 
     uint8_t logLevel; //Level of logging to output on serial line
-    uint8_t systemType; //0 = A0RET, 1 = EVTV ESP32 Board, 2 = Macchine 5-CAN board
     
     boolean enableBT; //are we enabling bluetooth too?
     char btName[32];
