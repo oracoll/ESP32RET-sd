@@ -197,7 +197,7 @@ void setup()
     if (!sd_logger.begin()) {
         system_state = STATE_SD_ERROR;
     }
-    pinMode(LOG_BUTTON_PIN, INPUT_PULLUP);
+    pinMode(LOG_BUTTON_PIN, INPUT);
 
     if (settings.enableBT) 
     {
@@ -278,13 +278,13 @@ void loop()
     canManager.loop();
     /*if (!settings.enableBT)*/ wifiManager.loop();
 
-    static bool lastButtonState = HIGH;
+    static bool lastButtonState = LOW;
     static unsigned long lastDebounceTime = 0;
     unsigned long debounceDelay = 50;
     bool currentButtonState = digitalRead(LOG_BUTTON_PIN);
 
     if ((millis() - lastDebounceTime) > debounceDelay) {
-        if (currentButtonState == LOW && lastButtonState == HIGH) {
+        if (currentButtonState == HIGH && lastButtonState == LOW) {
             if (sd_logger.getIsLogging()) {
                 sd_logger.stopLogging();
             } else {
