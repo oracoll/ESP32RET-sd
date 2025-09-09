@@ -38,6 +38,11 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "gvret_comm.h"
 #include "can_manager.h"
 #include "lawicel.h"
+#include "sd_logger.h"
+
+#define LOG_BUTTON_PIN 15
+
+SDLogger sd_logger;
 
 //on the S3 we want the default pins to be different
 #ifdef CONFIG_IDF_TARGET_ESP32S3
@@ -186,6 +191,9 @@ void setup()
 
     canManager.setup();
 
+    sd_logger.begin();
+    pinMode(LOG_BUTTON_PIN, INPUT_PULLUP);
+
     if (settings.enableBT) 
     {
         Serial.println("Starting bluetooth");
@@ -253,6 +261,17 @@ void loop()
 
     canManager.loop();
     /*if (!settings.enableBT)*/ wifiManager.loop();
+
+    static bool lastButtonState = HIGH;
+    bool currentButtonState = digitalRead(LOG_BUTTON_PIN);
+    if (currentButtonState == LOW && lastButtonState == HIGH) {
+        if (sd_logger.getIsLogging()) {
+            sd_logger.stopLogging();
+        } else {
+            sd_logger.startLogging();
+        }
+    }
+    lastButtonState = currentButtonState;
 
     if (leds[0] != CRGB::Red && (millis() - canManager.lastLEDActivity > 50)) { // 50ms duration
         leds[0] = CRGB::Red;

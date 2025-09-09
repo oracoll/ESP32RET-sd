@@ -130,6 +130,7 @@ void CANManager::sendFrame(CAN_COMMON *bus, CAN_FRAME &frame)
     bus->sendFrame(frame);
     addBits(whichBus, frame);
     handleLEDTX(whichBus);
+    sd_logger.logCANFrame(frame, whichBus, "TX");
 }
 
 void CANManager::sendFrame(CAN_COMMON *bus, CAN_FRAME_FD &frame)
@@ -139,6 +140,7 @@ void CANManager::sendFrame(CAN_COMMON *bus, CAN_FRAME_FD &frame)
     bus->sendFrameFD(frame);
     addBits(whichBus, frame);
     handleLEDTX(whichBus);
+    //sd_logger.logCANFrame(frame, whichBus, "TX"); //TODO: Need to handle FD frames
 }
 
 
@@ -233,6 +235,7 @@ void CANManager::loop()
                 addBits(i, incoming);
                 displayFrame(incoming, i);
                 handleLEDRX(i);
+                sd_logger.logCANFrame(incoming, i, "RX");
             }
             else
             {
