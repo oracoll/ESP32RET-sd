@@ -7,8 +7,10 @@
 #include "lawicel.h"
 #include "ELM327_Emulator.h"
 #include <FastLED.h>
+#include "sd_logger.h"
 
 extern CRGB leds[A0_NUM_LEDS];
+extern SDLogger sd_logger;
 
 
 //twai alerts copied here for ease of access. Look up alerts right here:

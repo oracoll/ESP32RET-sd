@@ -3,7 +3,8 @@
 #include <Arduino.h>
 #include <SPI.h>
 #include <SD.h>
-#include "can_manager.h" // For CAN_FRAME
+
+struct CAN_FRAME; // Forward declaration
 
 class SDLogger
 {

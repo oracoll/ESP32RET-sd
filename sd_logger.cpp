@@ -1,4 +1,5 @@
 #include "sd_logger.h"
+#include "esp32_can.h" // For CAN_FRAME definition
 
 // SD Card CS pin
 #define SD_CS_PIN 4

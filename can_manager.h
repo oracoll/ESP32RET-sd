@@ -1,8 +1,5 @@
 #pragma once
 #include "config.h"
-#include "sd_logger.h"
-
-extern SDLogger sd_logger;
 
 typedef struct {
     uint32_t bitsPerQuarter;
