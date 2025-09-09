@@ -35,6 +35,7 @@ void SDLogger::startLogging() {
         Serial.print("Starting log: ");
         Serial.println(fileName);
         logFile.println("Timestamp,Bus,Type,ID,Length,Data");
+        logFile.flush(); // Force write header to card
         isLogging = true;
     } else {
         Serial.print("Error opening ");
@@ -47,7 +48,7 @@ void SDLogger::stopLogging() {
         return;
     }
     Serial.println("Stopping log.");
-    logFile.close();
+    logFile.close(); // close() also flushes the buffer
     isLogging = false;
 }
 
@@ -73,6 +74,7 @@ void SDLogger::logCANFrame(const CAN_FRAME& frame, int bus, const char* type) {
             frame.data.byte[7]);
 
     logFile.println(buffer);
+    logFile.flush(); // Force write frame to card
 }
 
 bool SDLogger::getIsLogging() {
