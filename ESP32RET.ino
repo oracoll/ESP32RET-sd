@@ -44,6 +44,9 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 SDLogger sd_logger;
 
+enum SystemState { STATE_OK, STATE_SD_ERROR };
+SystemState system_state = STATE_OK;
+
 //on the S3 we want the default pins to be different
 #ifdef CONFIG_IDF_TARGET_ESP32S3
 MCP2517FD CAN1(10, 3);
@@ -191,7 +194,9 @@ void setup()
 
     canManager.setup();
 
-    sd_logger.begin();
+    if (!sd_logger.begin()) {
+        system_state = STATE_SD_ERROR;
+    }
     pinMode(LOG_BUTTON_PIN, INPUT_PULLUP);
 
     if (settings.enableBT) 
@@ -249,6 +254,17 @@ fastest and safest with limited function calls
 */
 void loop()
 {
+    if (system_state == STATE_SD_ERROR) {
+        // Blink red light to indicate SD error and halt.
+        leds[0] = CRGB::Red;
+        FastLED.show();
+        delay(500);
+        leds[0] = CRGB::Black;
+        FastLED.show();
+        delay(500);
+        return;
+    }
+
     //uint32_t temp32;    
     bool isConnected = false;
     int serialCnt;
@@ -263,20 +279,29 @@ void loop()
     /*if (!settings.enableBT)*/ wifiManager.loop();
 
     static bool lastButtonState = HIGH;
+    static unsigned long lastDebounceTime = 0;
+    unsigned long debounceDelay = 50;
     bool currentButtonState = digitalRead(LOG_BUTTON_PIN);
-    if (currentButtonState == LOW && lastButtonState == HIGH) {
-        if (sd_logger.getIsLogging()) {
-            sd_logger.stopLogging();
-        } else {
-            sd_logger.startLogging();
+
+    if ((millis() - lastDebounceTime) > debounceDelay) {
+        if (currentButtonState == LOW && lastButtonState == HIGH) {
+            if (sd_logger.getIsLogging()) {
+                sd_logger.stopLogging();
+            } else {
+                sd_logger.startLogging();
+            }
+            lastDebounceTime = millis();
         }
     }
     lastButtonState = currentButtonState;
 
-    if (leds[0] != CRGB::Red && (millis() - canManager.lastLEDActivity > 50)) { // 50ms duration
-        leds[0] = CRGB::Red;
+    // LED Status Logic
+    CRGB idleColor = sd_logger.getIsLogging() ? CRGB::White : CRGB::Red;
+    if (leds[0] != idleColor && (millis() - canManager.lastLEDActivity > 50)) { // 50ms duration
+        leds[0] = idleColor;
         FastLED.show();
     }
+
 
     size_t wifiLength = wifiGVRET.numAvailableBytes();
     size_t serialLength = serialGVRET.numAvailableBytes();
