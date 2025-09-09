@@ -58,20 +58,16 @@ void SDLogger::logCANFrame(const CAN_FRAME& frame, int bus, const char* type) {
     }
 
     char buffer[128];
-    sprintf(buffer, "%lu,%d,%s,0x%08X,%d,%02X%02X%02X%02X%02X%02X%02X%02X",
+    int offset = sprintf(buffer, "%lu,%d,%s,0x%08X,%d,",
             millis(),
             bus,
             type,
             frame.id,
-            frame.length,
-            frame.data.byte[0],
-            frame.data.byte[1],
-            frame.data.byte[2],
-            frame.data.byte[3],
-            frame.data.byte[4],
-            frame.data.byte[5],
-            frame.data.byte[6],
-            frame.data.byte[7]);
+            frame.length);
+
+    for (int i = 0; i < frame.length; i++) {
+        offset += sprintf(buffer + offset, "0x%02X ", frame.data.byte[i]);
+    }
 
     logFile.println(buffer);
     logFile.flush(); // Force write frame to card
