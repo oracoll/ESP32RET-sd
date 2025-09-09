@@ -58,7 +58,7 @@ void SDLogger::logCANFrame(const CAN_FRAME& frame, int bus, const char* type) {
     }
 
     char buffer[128];
-    int offset = sprintf(buffer, "%lu,%d,%s,0x%08X,%d,",
+    int offset = sprintf(buffer, "%lu,%d,%s,0x%X,%d,",
             millis(),
             bus,
             type,
