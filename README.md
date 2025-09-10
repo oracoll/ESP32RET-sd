@@ -1,3 +1,12 @@
+ESP32RET + SD only for EVTV ESP32 CANDue
+
+This fork is amed to add and remove some functionalaty from th e original grate code that colin80 did.
+Aded SD card support for logign all can comunication ( sd card CS is tied to GPIO 4 and uses the default SPI pins).
+Aded an button to GPIO15 that pulls high in order to activate logigng .
+Adresable led on GPIO2  will blink Red if card is not recognised , will blink green wen activity is detected on CAN0 an blink blue wen activity is detected on CAN1 , and will be withe wen logig is active.
+The files will be saved in a CSV format file, new file beiing created wen logign is stoped and started again.
+Alsow removed all other board support.
+
 ESP32RET
 =======
 
